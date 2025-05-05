@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:project_akhir1/note_page.dart';
+import 'package:project_akhir1/note.dart';
+import 'package:project_akhir1/note_database.dart';
 
 void main() async {
   //supabase setup
   WidgetsFlutterBinding.ensureInitialized();
   await Supabase.initialize(
-    url: "https://iaraofinpyowiiiytsug.supabase.co",
+    url: 'https://iaraofinpyowiiiytsug.supabase.co',
     anonKey:
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlhcmFvZmlucHlvd2lpaXl0c3VnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU5MjE2MDEsImV4cCI6MjA2MTQ5NzYwMX0.qCIhdoKF8SRUIJlZ26op_IxpTkHMnvEXwGY2PMU_-h0",
   );
@@ -17,7 +20,7 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: Scaffold(body: Center(child: Text('Hello World!'))),
-    );
+      home: NotePage(),
+    ); //matetrial app
   }
 }
