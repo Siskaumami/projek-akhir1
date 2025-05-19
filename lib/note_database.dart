@@ -14,7 +14,7 @@ class NoteDatabase {
   final stream = Supabase.instance.client
       .from('notes')
       .stream(primaryKey: ['id'])
-      .map((data) => data.map((noteMap) => Note.fromMap(noteMap)).toList());
+      .map((data) => data.map((noteMap) => Note.fromMap(noteMap)).toList);
 
   // Update
   Future updateNote(Note oldNote, String newContent) async {
