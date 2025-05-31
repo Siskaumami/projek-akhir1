@@ -1,178 +1,163 @@
-import 'package:flutter/material.dart';
-import 'package:project_akhir1/note.dart';
-import 'package:project_akhir1/note_database.dart';
-
-class NotePage extends StatefulWidget {
+import 'package:flutter/material.dart'; // Mengimpor library UI Flutter
+import 'package:project_akhir1/note.dart'; // Mengimpor model Note
+import 'package:project_akhir1/note_database.dart'; // Mengimpor database Note
+class NotePage extends StatefulWidget { // Komponen utama halaman catatan, bersifat Stateful
   const NotePage({super.key});
 
   @override
-  State<NotePage> createState() => _NotePageState();
+  State<NotePage> createState() => _NotePageState(); // Membuat state dari widget ini
 }
-
 class _NotePageState extends State<NotePage> {
-  //notes db
-  final notesDatabase = NoteDatabase();
+  final NoteDatabase notesDatabase = NoteDatabase(); // Inisialisasi database catatan
+  final TextEditingController noteController = TextEditingController(); // Controller untuk input catatan
+  void showNoteDialog({Note? existingNote}) {
+    if (existingNote != null) {
+      noteController.text = existingNote.content; // Isi controller dengan konten lama jika edit
+    } else {
+      noteController.clear(); // Kosongkan jika buat baru
+    }
 
-  //text controller
-  final noteControllerr = TextEditingController();
-
-  // user wants to add new note
-  void addNewNote() {
-    showDialog(
+    showDialog( // Tampilkan dialog input
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text("New Note"),
-            content: TextField(controller: noteControllerr),
-            actions: [
-              // cancel button
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  noteControllerr.clear();
-                },
-                child: const Text("Cancel"),
-              ),
-
-              // save button
-              TextButton(
-                onPressed: () {
-                  //create a new note
-                  final newNote = Note(content: noteControllerr.text);
-                  // save in db
-                  notesDatabase.createNote(newNote);
-
-                  Navigator.pop(context);
-                  noteControllerr.clear();
-                },
-                child: const Text("Save"),
-              ),
-            ],
+      builder: (context) {
+        return AlertDialog(
+          title: Text(existingNote == null ? "Tambah Catatan Baru" : "Edit Catatan"), // Judul dialog
+          content: TextField( // Text field untuk menulis catatan
+            controller: noteController,
+            maxLines: 5,
+            decoration: const InputDecoration(
+              hintText: "Tulis catatan di sini...",
+              border: OutlineInputBorder(),
+            ),
           ),
+          actions: [
+            TextButton( // Tombol Batal
+              onPressed: () {
+                noteController.clear();
+                Navigator.pop(context);
+              },
+              child: const Text("Batal"),
+            ),
+            ElevatedButton( // Tombol Simpan/Update
+              onPressed: () {
+                final text = noteController.text.trim();
+                if (text.isNotEmpty) {
+                  if (existingNote == null) {
+                    notesDatabase.createNote(Note(content: text)); // Simpan catatan baru
+                  } else {
+                    notesDatabase.updateNote(existingNote, text); // Perbarui catatan lama
+                  }
+                }
+                noteController.clear();
+                Navigator.pop(context); // Tutup dialog
+              },
+              child: Text(existingNote == null ? "Simpan" : "Update"),
+            ),
+          ],
+        );
+      },
     );
   }
-
-  // user wants to update note
-  void updateNote(Note note) {
-    // pre-fill text controller with existing note
-    noteControllerr.text = note.content;
-    showDialog(
+  void confirmDelete(Note note) {
+    showDialog( // Tampilkan konfirmasi hapus
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text("Update Note"),
-            content: TextField(controller: noteControllerr),
-            actions: [
-              // cancel button
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  noteControllerr.clear();
-                },
-                child: const Text("Cancel"),
-              ),
-
-              // save button
-              TextButton(
-                onPressed: () {
-                  // save in db
-                  notesDatabase.updateNote(note, noteControllerr.text);
-
-                  Navigator.pop(context);
-                  noteControllerr.clear();
-                },
-                child: const Text("Save"),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text("Hapus Catatan"),
+        content: const Text("Apakah kamu yakin ingin menghapus catatan ini?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context), // Tutup dialog
+            child: const Text("Batal"),
           ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red), // Tombol hapus berwarna merah
+            onPressed: () {
+              notesDatabase.deleteNote(note); // Hapus catatan dari database
+              Navigator.pop(context); // Tutup dialog
+            },
+            child: const Text("Hapus"),
+          ),
+        ],
+      ),
     );
   }
-
-  // user wants to delete note
-  void deleteNote(Note note) {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text("Delete Note?"),
-            actions: [
-              // cancel button
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  noteControllerr.clear();
-                },
-                child: const Text("Cancel"),
-              ),
-
-              // save button
-              TextButton(
-                onPressed: () {
-                  // save in db
-                  notesDatabase.deleteNote(note);
-
-                  Navigator.pop(context);
-                  noteControllerr.clear();
-                },
-                child: const Text("Delete"),
-              ),
-            ],
-          ),
-    );
+  @override
+  void dispose() {
+    noteController.dispose(); // Buang controller agar tidak terjadi memory leak
+    super.dispose();
   }
-  //BUILD UI
-
+  //UI UTAMA
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // App Bar
-      appBar: AppBar(title: const Text("Notes")),
-      // Button
-      floatingActionButton: FloatingActionButton(
-        onPressed: addNewNote,
-        child: const Icon(Icons.add),
+      backgroundColor: Colors.grey.shade100, // Warna latar belakang
+      appBar: AppBar(
+        title: const Text("Aplikasi Catatan"),
+        centerTitle: true,
+        backgroundColor: Colors.pink.shade400,
+        elevation: 2, // Shadow kecil di bawah AppBar
       ),
-
-      // Body -> Stream Builder
-      body: StreamBuilder(
-        // Listens to this stream..
-        stream: notesDatabase.stream,
-
-        // to build our UI..
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.pink.shade400,
+        child: const Icon(Icons.add), // Ikon tambah
+        onPressed: () => showNoteDialog(), // Buka dialog catatan baru
+      ),
+      //menampilkan daftar catatan
+            body: StreamBuilder<List<Note>>(
+        stream: notesDatabase.stream, // Ambil stream dari database
         builder: (context, snapshot) {
-          //loading
-          if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator()); // Tampilkan loading
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}')); // Tampilkan error
           }
 
-          //loaded!
-          final notes = snapshot.data!();
+          final notes = snapshot.data ?? []; // Ambil data catatan, jika null maka list kosong
 
-          // list of notes UI
-          return ListView.builder(
+          if (notes.isEmpty) {
+            return const Center( // Jika tidak ada catatan
+              child: Text(
+                "Belum ada catatan.\nTekan tombol + untuk membuat catatan baru.",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 18, color: Colors.grey),
+              ),
+            );
+          }
+          return ListView.separated(
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
             itemCount: notes.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 12), // Jarak antar item
             itemBuilder: (context, index) {
-              //get each note
               final note = notes[index];
-
-              //list tile UI
-              return ListTile(
-                title: Text(note.content),
-                trailing: SizedBox(
-                  width: 100,
-                  child: Row(
-                    children: [
-                      //update button
-                      IconButton(
-                        onPressed: () => updateNote(note),
-                        icon: const Icon(Icons.edit),
-                      ),
-                      //delete button
-                      IconButton(
-                        onPressed: () => deleteNote(note),
-                        icon: const Icon(Icons.delete),
-                      ),
-                    ],
+              return Card( // Gunakan Card untuk tampilan menarik
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 3,
+                child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+                  title: Text(
+                    note.content,
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                  trailing: SizedBox(
+                    width: 96,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.edit, color: Colors.blue),
+                          onPressed: () => showNoteDialog(existingNote: note), // Edit catatan
+                          tooltip: "Edit Catatan",
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () => confirmDelete(note), // Hapus catatan
+                          tooltip: "Hapus Catatan",
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               );
@@ -183,3 +168,4 @@ class _NotePageState extends State<NotePage> {
     );
   }
 }
+

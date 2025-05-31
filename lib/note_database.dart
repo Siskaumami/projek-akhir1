@@ -1,28 +1,34 @@
-import 'package:project_akhir1/note.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-  
+import 'package:project_akhir1/note.dart'; 
+import 'package:supabase_flutter/supabase_flutter.dart'; // Import Supabase SDK untuk Flutter
+
 class NoteDatabase {
-  // Database -> notes
-  final database = Supabase.instance.client.from('notes');
+  final _db = Supabase.instance.client.from('notes'); // Referensi ke tabel 'notes'
 
-  // Create
-  Future createNote(Note newNote) async {
-    await database.insert(newNote.toMap());
+  // Stream realtime untuk mengambil list catatan dari Supabase
+  Stream<List<Note>> get stream => Supabase.instance.client
+      .from('notes') // Tabel 'notes'
+      .stream(primaryKey: ['id']) // Mengaktifkan fitur stream dengan primaryKey 'id'
+      .order('id', ascending: false) // Urutkan dari ID terbesar (catatan terbaru)
+      .map((data) => data.map<Note>((e) => Note.fromMap(e)).toList()); // Ubah hasil dari Map ke objek Note
+
+  // Fungsi untuk menambahkan catatan baru
+  Future<void> createNote(Note newNote) async {
+    await _db.insert(newNote.toMap()); // Insert catatan ke tabel
   }
 
-  // Read
-  final stream = Supabase.instance.client
-      .from('notes')
-      .stream(primaryKey: ['id'])
-      .map((data) => data.map((noteMap) => Note.fromMap(noteMap)).toList);
-
-  // Update
-  Future updateNote(Note oldNote, String newContent) async {
-    await database.update({'content': newContent}).eq('id', oldNote.id!);
+  // Fungsi untuk mengupdate isi catatan
+  Future<void> updateNote(Note oldNote, String newContent) async {
+    if (oldNote.id == null) {
+      throw ArgumentError('Note id cannot be null'); // Validasi: pastikan ada ID
+    }
+    await _db.update({'content': newContent}).eq('id', oldNote.id!); // Update konten catatan berdasarkan ID
   }
 
-  // Delete
-  Future deleteNote(Note note) async {
-    await database.delete().eq('id', note.id!);
+  // Fungsi untuk menghapus catatan
+  Future<void> deleteNote(Note note) async {
+    if (note.id == null) {
+      throw ArgumentError('Note id cannot be null'); // Validasi: pastikan ada ID
+    }
+    await _db.delete().eq('id', note.id!); // Hapus catatan berdasarkan ID
   }
 }
