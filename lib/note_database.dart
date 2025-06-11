@@ -1,5 +1,7 @@
 import 'package:project_akhir1/note.dart'; 
 import 'package:supabase_flutter/supabase_flutter.dart'; // Import Supabase SDK untuk Flutter
+//notepage=notification
+
 
 class NoteDatabase {
   final _db = Supabase.instance.client.from('notes'); // Referensi ke tabel 'notes'

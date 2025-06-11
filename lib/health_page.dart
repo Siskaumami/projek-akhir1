@@ -6,9 +6,16 @@ class HealthPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.blue.shade50, // Latar belakang biru muda
       appBar: AppBar(
-        title: const Text("Kesehatan"),
-        backgroundColor: Colors.blue.shade700,
+        title: const Text(
+          "Health & Wellness",
+          style: TextStyle(color: Colors.white), // Warna teks putih
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.blue.shade700, // Warna AppBar biru tua
+        elevation: 0, // Tanpa shadow
+        // actions: [], // Menghapus ikon pengaturan di sini
       ),
       body: const Center(
         child: Text(

@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:project_akhir1/note.dart';
-import 'package:project_akhir1/note_database.dart';
-import 'package:project_akhir1/profile_page.dart'; // Import halaman profil
 
 class NotePage extends StatefulWidget {
   const NotePage({super.key});
@@ -11,282 +8,231 @@ class NotePage extends StatefulWidget {
 }
 
 class _NotePageState extends State<NotePage> {
-  final NoteDatabase notesDatabase = NoteDatabase();
-  final TextEditingController noteController = TextEditingController();
-  final TextEditingController searchController = TextEditingController();
-
-  String searchQuery = "";
-
-  void showNoteDialog({Note? existingNote}) {
-    if (existingNote != null) {
-      noteController.text = existingNote.content;
-    } else {
-      noteController.clear();
-    }
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(existingNote == null ? "Tambah Catatan Baru" : "Edit Catatan"),
-          content: TextField(
-            controller: noteController,
-            maxLines: 5,
-            decoration: const InputDecoration(
-              hintText: "Tulis catatan di sini...",
-              border: OutlineInputBorder(),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                noteController.clear();
-                Navigator.pop(context);
-              },
-              child: const Text("Batal"),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-              ),
-              onPressed: () {
-                final text = noteController.text.trim();
-                if (text.isNotEmpty) {
-                  if (existingNote == null) {
-                    notesDatabase.createNote(Note(content: text));
-                  } else {
-                    notesDatabase.updateNote(existingNote, text);
-                  }
-                }
-                noteController.clear();
-                Navigator.pop(context);
-              },
-              child: Text(existingNote == null ? "Simpan" : "Update"),
-            ),
-          ],
-        );
+  // Struktur data notifikasi yang lebih kaya sesuai desain
+  // Tambahan: 'isRead' untuk indikator status
+  final List<Map<String, dynamic>> _notifications = [
+    {
+      'id': 'notif1',
+      'isRead': false, // Notifikasi baru/belum dibaca
+      'title': 'Reminder!',
+      'body': 'Doctor appointment today at 6:30pm, need to pick up files on the way.',
+      'time': '23 min',
+      'icon': Icons.calendar_today, // Contoh ikon untuk reminder
+      'actionText': 'Mark as done - Update',
+      'onAction': () {
+        // Implementasi aksi: Tandai selesai atau update
+        print('Aksi: Mark as done - Update for notif1');
       },
-    );
-  }
+    },
+    {
+      'id': 'notif2',
+      'isRead': false,
+      'title': 'Your weekly health tip is ready!',
+      'body': "We've prepared your weekly health tip to help you customize your mood.",
+      'time': '2 hr',
+      'icon': Icons.health_and_safety, // Contoh ikon untuk health tip
+      'actionText': 'Open weekly tips',
+      'onAction': () {
+        // Implementasi aksi: Buka halaman tips kesehatan
+        print('Aksi: Open weekly tips for notif2');
+      },
+    },
+    {
+      'id': 'notif3',
+      'isRead': false,
+      'title': "It's time to enter your weight",
+      'body': "Track your weight and help us customize your weekly health tip for you.",
+      'time': '1 dy',
+      'icon': Icons.monitor_weight, // Contoh ikon untuk weight
+      'actionText': 'Add weight entry',
+      'onAction': () {
+        // Implementasi aksi: Buka halaman entri berat badan
+        print('Aksi: Add weight entry for notif3');
+      },
+    },
+    {
+      'id': 'notif4',
+      'isRead': true, // Notifikasi sudah dibaca
+      'title': 'Moment reminder!',
+      'body': 'Doctor appointment today at 6:30pm, need to pick up files on the way.',
+      'time': '1 wk',
+      'icon': Icons.calendar_today, // Contoh ikon untuk reminder
+      'actionText': 'View - Update', // Aksi bisa berbeda jika sudah dibaca
+      'onAction': () {
+        // Implementasi aksi
+        print('Aksi: View - Update for notif4');
+      },
+    },
+    {
+      'id': 'notif5',
+      'isRead': true, // Notifikasi sudah dibaca
+      'title': "It's time to enter your weight",
+      'body': "We've prepared your weekly health tip to help you improve your mood.",
+      'time': '1 yr',
+      'icon': Icons.monitor_weight, // Contoh ikon untuk weight
+      'actionText': 'Add weight entry',
+      'onAction': () {
+        // Implementasi aksi
+        print('Aksi: Add weight entry for notif5');
+      },
+    },
+  ];
 
-  void confirmDelete(Note note) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Hapus Catatan"),
-        content: const Text("Apakah kamu yakin ingin menghapus catatan ini?"),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Batal"),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            onPressed: () {
-              notesDatabase.deleteNote(note);
-              Navigator.pop(context);
-            },
-            child: const Text("Hapus"),
-          ),
-        ],
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    noteController.dispose();
-    searchController.dispose();
-    super.dispose();
+  // Fungsi untuk mengubah status 'isRead' (opsional, untuk simulasi)
+  void _toggleReadStatus(String id) {
+    setState(() {
+      final index = _notifications.indexWhere((notif) => notif['id'] == id);
+      if (index != -1) {
+        _notifications[index]['isRead'] = !_notifications[index]['isRead'];
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.blue.shade50, // Latar belakang biru muda
       appBar: AppBar(
-        title: const Text("Aplikasi Catatan"),
+        title: const Text(
+          "Notifications",
+          style: TextStyle(color: Colors.white), // Warna teks putih
+        ),
         centerTitle: true,
-        backgroundColor: Colors.blue.shade700,
-        elevation: 2,
+        backgroundColor: Colors.blue.shade700, // Warna AppBar biru tua
+        elevation: 0, // Tanpa shadow
+        // actions: [], // Menghapus ikon pengaturan di sini
       ),
-      // --- Mulai penambahan Drawer untuk navigasi ke profil ---
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            DrawerHeader(
-              decoration: BoxDecoration(
-                color: Colors.blue.shade700,
-              ),
-              child: const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+      body: _notifications.isEmpty
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  CircleAvatar(
-                    radius: 30,
-                    backgroundImage: NetworkImage(
-                        'https://via.placeholder.com/150'), // Ganti dengan gambar profil default
+                  // Ikon bell tidur
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Container(
+                        width: 100,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.blue.shade100, // Lingkaran lebih kebiruan
+                        ),
+                        child: Icon(
+                          Icons.notifications,
+                          size: 50,
+                          color: Colors.blue.shade800, // Warna ikon bell
+                        ),
+                      ),
+                      Positioned(
+                        top: 15,
+                        right: 15,
+                        child: Text(
+                          'Z\nZ', // Zz di atas bell
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue.shade400, // Warna Zz
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  SizedBox(height: 10),
-                  Text(
-                    'Pengguna Aplikasi', // Nama pengguna
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                    ),
+                  const SizedBox(height: 24),
+                  const Text(
+                    "You're all caught up",
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.blue), // Warna teks biru
+                    textAlign: TextAlign.center,
                   ),
-                  Text(
-                    'catatan@example.com', // Email pengguna
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 14,
+                  const SizedBox(height: 8),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 40.0),
+                    child: Text(
+                      "Come back later for Reminders, health tips, moments and weight notifications",
+                      style: TextStyle(fontSize: 16, color: Colors.blueGrey), // Warna teks abu-abu kebiruan
+                      textAlign: TextAlign.center,
                     ),
                   ),
                 ],
               ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.note_alt),
-              title: const Text('Catatan Saya'),
-              onTap: () {
-                Navigator.pop(context); // Tutup drawer
-                // Sudah berada di NotePage, jadi tidak perlu navigasi
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.person),
-              title: const Text('Profil'),
-              onTap: () {
-                Navigator.pop(context); // Tutup drawer
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const ProfilePage()),
-                );
-              },
-            ),
-            // Tambahkan item lain di drawer jika diperlukan, misalnya pengaturan
-            const Divider(), // Garis pemisah
-            ListTile(
-              leading: const Icon(Icons.info_outline),
-              title: const Text('Tentang Aplikasi'),
-              onTap: () {
-                Navigator.pop(context); // Tutup drawer
-                // Aksi untuk membuka halaman "Tentang Aplikasi"
-                showAboutDialog(
-                  context: context,
-                  applicationName: 'Aplikasi Catatan',
-                  applicationVersion: '1.0.0',
-                  applicationLegalese: '© 2025 Semua Hak Dilindungi',
-                  children: <Widget>[
-                    const Padding(
-                      padding: EdgeInsets.only(top: 15.0),
-                      child: Text('Aplikasi sederhana untuk mencatat ide dan informasi penting Anda.'),
+            )
+          : ListView.separated(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+              itemCount: _notifications.length,
+              separatorBuilder: (context, index) => const SizedBox(height: 16), // Jarak antar item
+              itemBuilder: (context, index) {
+                final notification = _notifications[index];
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Indikator status (lingkaran kecil)
+                        Container(
+                          width: 8,
+                          height: 8,
+                          margin: const EdgeInsets.only(top: 6),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: notification['isRead']
+                                ? Colors.lightBlue.shade300 // Biru muda jika sudah dibaca
+                                : Colors.blue.shade700, // Biru tua jika belum dibaca
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        // Konten notifikasi
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    notification['title']!,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                      color: Colors.black87, // Tetap hitam agar mudah dibaca
+                                    ),
+                                  ),
+                                  Text(
+                                    notification['time']!,
+                                    style: const TextStyle(fontSize: 13, color: Colors.grey),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                notification['body']!,
+                                style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 8),
+                              // Aksi notifikasi (TextButton)
+                              if (notification['actionText'] != null)
+                                GestureDetector(
+                                  onTap: notification['onAction'],
+                                  child: Text(
+                                    notification['actionText']!,
+                                    style: TextStyle(
+                                      color: Colors.blue.shade700, // Warna biru tua untuk aksi
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 );
               },
             ),
-          ],
-        ),
-      ),
-      // --- Selesai penambahan Drawer ---
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.blue.shade700,
-        child: const Icon(Icons.add),
-        onPressed: () => showNoteDialog(),
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            child: TextField(
-              controller: searchController,
-              decoration: InputDecoration(
-                hintText: "Cari catatan...",
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              onChanged: (value) {
-                setState(() {
-                  searchQuery = value.toLowerCase();
-                });
-              },
-            ),
-          ),
-          Expanded(
-            child: StreamBuilder<List<Note>>(
-              stream: notesDatabase.stream,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                }
-
-                final notes = snapshot.data ?? [];
-
-                // Filter berdasarkan kata kunci pencarian
-                final filteredNotes = notes.where((note) {
-                  return note.content.toLowerCase().contains(searchQuery);
-                }).toList();
-
-                if (filteredNotes.isEmpty) {
-                  return const Center(
-                    child: Text(
-                      "Tidak ditemukan catatan.\nCoba kata kunci lain.",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 18, color: Colors.grey),
-                    ),
-                  );
-                }
-
-                return ListView.separated(
-                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                  itemCount: filteredNotes.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
-                  itemBuilder: (context, index) {
-                    final note = filteredNotes[index];
-                    return Card(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 3,
-                      child: ListTile(
-                        contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
-                        title: Text(
-                          note.content,
-                          style: const TextStyle(fontSize: 16),
-                        ),
-                        trailing: SizedBox(
-                          width: 96,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.edit, color: Colors.blue),
-                                onPressed: () => showNoteDialog(existingNote: note),
-                                tooltip: "Edit Catatan",
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.delete, color: Colors.red),
-                                onPressed: () => confirmDelete(note),
-                                tooltip: "Hapus Catatan",
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
