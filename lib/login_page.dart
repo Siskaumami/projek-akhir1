@@ -13,13 +13,9 @@ class LoginPage extends StatelessWidget {
     // Untuk saat ini, kita bisa mensimulasikan login berhasil atau gagal
     try {
       // Ganti ini dengan logika Supabase login yang sebenarnya
-      // Contoh:
-      // await Supabase.instance.client.auth.signInWithPassword(
-      //   email: data.name,
-      //   password: data.password,
-      // );
+  
       await Future.delayed(loadingTime); // Simulasi proses async
-      
+    
       // Jika login berhasil, kembalikan null (berarti tidak ada error)
       return null; 
     } catch (e) {
@@ -43,7 +39,7 @@ class LoginPage extends StatelessWidget {
         // Setelah login/registrasi selesai dan animasinya beres
         // NAVIGASI KE MAINSCREEN, BUKAN NOTEPAAGE
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const MainScreen()), // <-- PERBAIKI DI SINI!
+          MaterialPageRoute(builder: (context) => const MainScreen()), 
         );
       },
       theme: LoginTheme(

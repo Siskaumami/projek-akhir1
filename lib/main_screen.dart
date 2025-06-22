@@ -61,3 +61,5 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 }
+//mainscreen adalah halaman utama yang menampilkan navigasi ke Today, Track, Health, dan Notifications (NotePage).
+// Halaman ini menggunakan BottomNavigationBar untuk navigasi antar halaman.

@@ -1,34 +1,32 @@
-import 'package:flutter/material.dart';
-import 'package:project_akhir1/note.dart'; // Pastikan path ini benar
-import 'package:project_akhir1/note_database.dart'; // Pastikan path ini benar
-import 'package:project_akhir1/profile_page.dart'; // Pastikan path ini benar (jika ingin drawer tetap ada)
-
+import 'package:flutter/material.dart';// Mengimpor pustaka UI dasar Flutter
+import 'package:project_akhir1/note.dart'; // Model catatan
+// Mengimpor kelas NoteDatabase untuk CRUD catatan
+import 'package:project_akhir1/note_database.dart'; 
+import 'package:project_akhir1/profile_page.dart'; 
 class TodayPage extends StatefulWidget {
   const TodayPage({super.key});
 
   @override
   State<TodayPage> createState() => _TodayPageState();
 }
-
+// State dari halaman TodayPage
 class _TodayPageState extends State<TodayPage> {
-  final NoteDatabase notesDatabase = NoteDatabase();
-  final TextEditingController noteController = TextEditingController();
-  final TextEditingController searchController = TextEditingController();
-
-  String searchQuery = "";
+  final NoteDatabase notesDatabase = NoteDatabase(); // fungsi Instance database
+  final TextEditingController noteController = TextEditingController(); //fungsi  Controller untuk input catatan
+  final TextEditingController searchController = TextEditingController(); // fungsi Controller untuk input pencarian
+  String searchQuery = ""; // fungsi Query pencarian
 
   @override
   void initState() {
     super.initState();
-    // Inisialisasi database jika diperlukan, meskipun biasanya sudah diinisialisasi di NoteDatabase itu sendiri
-    // notesDatabase.initDatabase(); // contoh jika ada method init di NoteDatabase
+    // fungsi Bisa digunakan untuk inisialisasi database jika dibutuhkan
   }
-
+  // Fungsi untuk menampilkan dialog tambah/edit catatan
   void showNoteDialog({Note? existingNote}) {
     if (existingNote != null) {
-      noteController.text = existingNote.content;
+      noteController.text = existingNote.content; // fungsi Jika edit, isi field dengan konten lama
     } else {
-      noteController.clear();
+      noteController.clear(); // fungsi Jika tambah, kosongkan field
     }
 
     showDialog(
@@ -37,7 +35,7 @@ class _TodayPageState extends State<TodayPage> {
         return AlertDialog(
           title: Text(
             existingNote == null ? "Tambah Catatan Baru" : "Edit Catatan",
-            style: TextStyle(color: Colors.blue.shade700), // Judul dialog biru
+            style: TextStyle(color: Colors.blue.shade700),
           ),
           content: TextField(
             controller: noteController,
@@ -46,11 +44,11 @@ class _TodayPageState extends State<TodayPage> {
               hintText: "Tulis catatan di sini...",
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: Colors.blue.shade300), // Border field biru muda
+                borderSide: BorderSide(color: Colors.blue.shade300),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: Colors.blue.shade700, width: 2), // Border focused biru tua
+                borderSide: BorderSide(color: Colors.blue.shade700, width: 2),
               ),
             ),
           ),
@@ -58,29 +56,26 @@ class _TodayPageState extends State<TodayPage> {
             TextButton(
               onPressed: () {
                 noteController.clear();
-                Navigator.pop(context);
+                Navigator.pop(context); // Tutup dialog
               },
-              child: Text(
-                "Batal",
-                style: TextStyle(color: Colors.blue.shade500), // Warna teks batal biru
-              ),
+              child: Text("Batal", style: TextStyle(color: Colors.blue.shade500)),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue.shade700, // Warna tombol simpan/update biru tua
-                foregroundColor: Colors.white, // Warna teks tombol putih
+                backgroundColor: Colors.blue.shade700,
+                foregroundColor: Colors.white,
               ),
               onPressed: () {
                 final text = noteController.text.trim();
                 if (text.isNotEmpty) {
                   if (existingNote == null) {
-                    notesDatabase.createNote(Note(content: text));
+                    notesDatabase.createNote(Note(content: text)); // Simpan catatan baru
                   } else {
-                    notesDatabase.updateNote(existingNote, text);
+                    notesDatabase.updateNote(existingNote, text); // Update catatan lama
                   }
                 }
                 noteController.clear();
-                Navigator.pop(context);
+                Navigator.pop(context); // Tutup dialog
               },
               child: Text(existingNote == null ? "Simpan" : "Update"),
             ),
@@ -90,28 +85,26 @@ class _TodayPageState extends State<TodayPage> {
     );
   }
 
+  // Fungsi untuk konfirmasi sebelum menghapus catatan
   void confirmDelete(Note note) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text(
-          "Hapus Catatan",
-          style: TextStyle(color: Colors.red), // Judul dialog hapus merah
-        ),
+        title: const Text("Hapus Catatan", style: TextStyle(color: Colors.red)),
         content: const Text("Apakah kamu yakin ingin menghapus catatan ini?"),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text("Batal", style: TextStyle(color: Colors.blueGrey)), // Warna teks batal abu-abu
+            child: const Text("Batal", style: TextStyle(color: Colors.blueGrey)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red.shade700, // Warna tombol hapus merah tua
-              foregroundColor: Colors.white, // Warna teks tombol putih
+              backgroundColor: Colors.red.shade700,
+              foregroundColor: Colors.white,
             ),
             onPressed: () {
-              notesDatabase.deleteNote(note);
-              Navigator.pop(context);
+              notesDatabase.deleteNote(note); // Hapus catatan
+              Navigator.pop(context); // Tutup dialog
             },
             child: const Text("Hapus"),
           ),
@@ -122,95 +115,72 @@ class _TodayPageState extends State<TodayPage> {
 
   @override
   void dispose() {
-    noteController.dispose();
-    searchController.dispose();
+    noteController.dispose(); // fungsi Bebaskan memori controller catatan
+    searchController.dispose(); // fungsi Bebaskan memori controller pencarian
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blue.shade50, // Latar belakang utama biru muda
+      backgroundColor: Colors.blue.shade50,
       appBar: AppBar(
-        title: const Text(
-          "Catatan Hari Ini", // Judul diubah sesuai konteks "TodayPage"
-          style: TextStyle(color: Colors.white), // Warna teks AppBar putih
-        ),
+        title: const Text("Catatan Hari Ini", style: TextStyle(color: Colors.white)),
         centerTitle: true,
-        backgroundColor: Colors.blue.shade700, // Warna AppBar biru tua
+        backgroundColor: Colors.blue.shade700,
         elevation: 2,
       ),
-      // Drawer (opsional, jika kamu ingin tetap ada navigasi profil dari sini)
-      drawer: Drawer(
+      drawer: Drawer( // Navigasi samping
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
             DrawerHeader(
-              decoration: BoxDecoration(
-                color: Colors.blue.shade700, // Warna DrawerHeader biru tua
-              ),
+              decoration: BoxDecoration(color: Colors.blue.shade700),
               child: const Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   CircleAvatar(
                     radius: 30,
-                    backgroundImage: NetworkImage(
-                        'https://via.placeholder.com/150'), // Ganti dengan gambar profil default
+                    backgroundImage: NetworkImage('https://via.placeholder.com/150'),
                   ),
                   SizedBox(height: 10),
-                  Text(
-                    'Pengguna Aplikasi', // Nama pengguna
-                    style: TextStyle(
-                      color: Colors.white, // Warna teks putih
-                      fontSize: 18,
-                    ),
-                  ),
-                  Text(
-                    'catatan@example.com', // Email pengguna
-                    style: TextStyle(
-                      color: Colors.white70, // Warna teks putih agak transparan
-                      fontSize: 14,
-                    ),
-                  ),
+                  Text('Pengguna Aplikasi', style: TextStyle(color: Colors.white, fontSize: 18)),
+                  Text('catatan@example.com', style: TextStyle(color: Colors.white70, fontSize: 14)),
                 ],
               ),
             ),
             ListTile(
-              leading: Icon(Icons.note_alt, color: Colors.blue.shade700), // Ikon biru tua
-              title: const Text('Catatan Saya', style: TextStyle(color: Colors.black87)), // Teks hitam
+              leading: Icon(Icons.note_alt, color: Colors.blue.shade700),
+              title: const Text('Catatan Saya', style: TextStyle(color: Colors.black87)),
               onTap: () {
-                Navigator.pop(context); // Tutup drawer
-                // Sudah berada di TodayPage (sekarang sebagai NotePage), jadi tidak perlu navigasi
+                Navigator.pop(context); // fungsi Tidak pindah karena ini halaman aktif
               },
             ),
             ListTile(
-              leading: Icon(Icons.person, color: Colors.blue.shade700), // Ikon biru tua
-              title: const Text('Profil', style: TextStyle(color: Colors.black87)), // Teks hitam
+              leading: Icon(Icons.person, color: Colors.blue.shade700),
+              title: const Text('Profil', style: TextStyle(color: Colors.black87)),
               onTap: () {
-                Navigator.pop(context); // Tutup drawer
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const ProfilePage()),
-                );
+                Navigator.pop(context);
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfilePage()));
               },
             ),
-            const Divider(), // Garis pemisah
+            const Divider(),
             ListTile(
-              leading: Icon(Icons.info_outline, color: Colors.blue.shade700), // Ikon biru tua
-              title: const Text('Tentang Aplikasi', style: TextStyle(color: Colors.black87)), // Teks hitam
+              leading: Icon(Icons.info_outline, color: Colors.blue.shade700),
+              title: const Text('Tentang Aplikasi', style: TextStyle(color: Colors.black87)),
               onTap: () {
-                Navigator.pop(context); // Tutup drawer
+                Navigator.pop(context);
                 showAboutDialog(
                   context: context,
                   applicationName: 'Aplikasi Catatan',
                   applicationVersion: '1.0.0',
                   applicationLegalese: '© 2025 Semua Hak Dilindungi',
-                  children: <Widget>[
-                    const Padding(
+                  children: const [
+                    Padding(
                       padding: EdgeInsets.only(top: 15.0),
                       child: Text(
                         'Aplikasi sederhana untuk mencatat ide dan informasi penting Anda.',
-                        style: TextStyle(color: Colors.black87), // Teks hitam
+                        style: TextStyle(color: Colors.black87),
                       ),
                     ),
                   ],
@@ -220,58 +190,60 @@ class _TodayPageState extends State<TodayPage> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.blue.shade700, // FAB biru tua
-        foregroundColor: Colors.white, // Ikon FAB putih
+      floatingActionButton: FloatingActionButton( // Tombol tambah catatan
+        backgroundColor: Colors.blue.shade700,
+        foregroundColor: Colors.white,
         child: const Icon(Icons.add),
-        onPressed: () => showNoteDialog(),
+        onPressed: () => showNoteDialog(), // Panggil form tambah
       ),
       body: Column(
         children: [
+          // Input pencarian
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             child: TextField(
               controller: searchController,
               decoration: InputDecoration(
                 hintText: "Cari catatan...",
-                hintStyle: TextStyle(color: Colors.blue.shade300), // Warna hint text biru muda
-                prefixIcon: Icon(Icons.search, color: Colors.blue.shade500), // Warna ikon search biru
+                hintStyle: TextStyle(color: Colors.blue.shade300),
+                prefixIcon: Icon(Icons.search, color: Colors.blue.shade500),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.blue.shade300), // Border field biru muda
+                  borderSide: BorderSide(color: Colors.blue.shade300),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.blue.shade300), // Border field biru muda
+                  borderSide: BorderSide(color: Colors.blue.shade300),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.blue.shade700, width: 2), // Border focused biru tua
+                  borderSide: BorderSide(color: Colors.blue.shade700, width: 2),
                 ),
                 filled: true,
-                fillColor: Colors.white, // Latar belakang field putih
+                fillColor: Colors.white,
               ),
               onChanged: (value) {
                 setState(() {
-                  searchQuery = value.toLowerCase();
+                  searchQuery = value.toLowerCase(); // Update pencarian
                 });
               },
             ),
           ),
+          // Menampilkan daftar catatan dengan Stream
           Expanded(
             child: StreamBuilder<List<Note>>(
               stream: notesDatabase.stream,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator(color: Colors.blue.shade700)); // Warna progress biru tua
+                  return Center(child: CircularProgressIndicator(color: Colors.blue.shade700));
                 }
                 if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}', style: TextStyle(color: Colors.red))); // Warna error merah
+                  return Center(child: Text('Error: ${snapshot.error}', style: TextStyle(color: Colors.red)));
                 }
 
                 final notes = snapshot.data ?? [];
 
-                // Filter berdasarkan kata kunci pencarian
+                // Filter berdasarkan pencarian
                 final filteredNotes = notes.where((note) {
                   return note.content.toLowerCase().contains(searchQuery);
                 }).toList();
@@ -281,11 +253,12 @@ class _TodayPageState extends State<TodayPage> {
                     child: Text(
                       "Tidak ditemukan catatan.\nCoba kata kunci lain.",
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 18, color: Colors.blueGrey), // Warna teks abu-abu kebiruan
+                      style: TextStyle(fontSize: 18, color: Colors.blueGrey),
                     ),
                   );
                 }
 
+                // Tampilkan catatan dalam bentuk list
                 return ListView.separated(
                   padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                   itemCount: filteredNotes.length,
@@ -293,30 +266,27 @@ class _TodayPageState extends State<TodayPage> {
                   itemBuilder: (context, index) {
                     final note = filteredNotes[index];
                     return Card(
-                      color: Colors.white, // Warna Card putih
+                      color: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
-                        side: BorderSide(color: Colors.blue.shade100, width: 1), // Border card biru muda
+                        side: BorderSide(color: Colors.blue.shade100, width: 1),
                       ),
                       elevation: 3,
                       child: ListTile(
                         contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
-                        title: Text(
-                          note.content,
-                          style: const TextStyle(fontSize: 16, color: Colors.black87), // Warna teks catatan hitam
-                        ),
+                        title: Text(note.content, style: const TextStyle(fontSize: 16, color: Colors.black87)),
                         trailing: SizedBox(
                           width: 96,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               IconButton(
-                                icon: Icon(Icons.edit, color: Colors.blue.shade600), // Ikon edit biru
+                                icon: Icon(Icons.edit, color: Colors.blue.shade600),
                                 onPressed: () => showNoteDialog(existingNote: note),
                                 tooltip: "Edit Catatan",
                               ),
                               IconButton(
-                                icon: Icon(Icons.delete, color: Colors.red.shade600), // Ikon delete merah
+                                icon: Icon(Icons.delete, color: Colors.red.shade600),
                                 onPressed: () => confirmDelete(note),
                                 tooltip: "Hapus Catatan",
                               ),

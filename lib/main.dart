@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'dart:async'; // <-- TAMBAHKAN BARIS INI
+import 'dart:async'; 
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:project_akhir1/login_page.dart';
-import 'package:project_akhir1/main_screen.dart'; // PENTING: Pastikan ini diimport!
+import 'package:project_akhir1/main_screen.dart'; 
 // note_page.dart tidak perlu diimport langsung di sini karena sudah diimport oleh main_screen.dart
 // import 'package:project_akhir1/note_page.dart'; // TIDAK DIPERLUKAN DI SINI
 

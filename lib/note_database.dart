@@ -9,13 +9,13 @@ class NoteDatabase {
   // Stream realtime untuk mengambil list catatan dari Supabase
   Stream<List<Note>> get stream => Supabase.instance.client
       .from('notes') // Tabel 'notes'
-      .stream(primaryKey: ['id']) // Mengaktifkan fitur stream dengan primaryKey 'id'
-      .order('id', ascending: false) // Urutkan dari ID terbesar (catatan terbaru)
-      .map((data) => data.map<Note>((e) => Note.fromMap(e)).toList()); // Ubah hasil dari Map ke objek Note
+      .stream(primaryKey: ['id']) // fungsi Mengaktifkan fitur stream dengan primaryKey 'id'
+      .order('id', ascending: false) // sungsi Urutkan dari ID terbesar (catatan terbaru)
+      .map((data) => data.map<Note>((e) => Note.fromMap(e)).toList()); // fungsi Ubah hasil dari Map ke objek Note
 
   // Fungsi untuk menambahkan catatan baru
   Future<void> createNote(Note newNote) async {
-    await _db.insert(newNote.toMap()); // Insert catatan ke tabel
+    await _db.insert(newNote.toMap()); // fungsi Insert catatan ke tabel
   }
 
   // Fungsi untuk mengupdate isi catatan
