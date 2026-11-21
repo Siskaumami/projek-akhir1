@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "repository_id": 975956311,
+  "checkpoint_id": "onboarding",
+  "verified_at": "2026-11-19T11:53:19.556Z",
+  "foundation": "FOUNDATION_REQUIRED",
+  "actor_kind": "unknown",
+  "attribution": "UNVERIFIED",
+  "evidence": [
+    {
+      "kind": "commit",
+      "repository_id": 975956311,
+      "commit": "ce6abaf64834148e45c05ae36d04d8e331195b65"
+    }
+  ]
+}
